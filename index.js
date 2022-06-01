@@ -31,34 +31,53 @@ app.get("/deletetable", async (req, res) => {
     const params = {
         TableName: USERS_TABLE,
     }
-
-    let resp = await dynamodb.deleteTable(params).promise();
-    console.log(resp);
-    res.render('response', { response: 'Tabela Deletada' });
+    try {
+        let resp = await dynamodb.deleteTable(params).promise();
+        console.log(resp);
+        res.render('response', { response: 'Tabela Deletada' });
+    } catch (e) {
+        res.render('response', { response: e.message });
+    }
 })
 
 
 app.get("/createtable", async (req, res) => {
     const params = {
         TableName: USERS_TABLE,
-        KeySchema: [{ AttributeName: "avaliable", KeyType: "HASH" }],
-        AttributeDefinitions: [{ AttributeName: "avaliable", AttributeType: "S" }],
+        KeySchema: [{
+            AttributeName: "avaliable",
+            KeyType: "HASH"
+        }, {
+            AttributeName: "email",
+            KeyType: "RANGE"
+        }],
+        AttributeDefinitions: [{
+            AttributeName: "avaliable",
+            AttributeType: "S"
+        }, {
+            AttributeName: "email",
+            AttributeType: "S"
+        }],
         ProvisionedThroughput: {
             ReadCapacityUnits: 5,
             WriteCapacityUnits: 5
         }
     }
 
-    let response = await dynamodb.createTable(params, console.log).promise();
-    console.log(response);
-    res.render('response', { response: 'Tabela Criada' });
+    try {
+        let response = await dynamodb.createTable(params, console.log).promise();
+        console.log(response);
+        res.render('response', { response: 'Tabela Criada' });
+    } catch (e) {
+        res.render('response', { response: e.message });
+    }
 });
 
 app.get('/createuser', async (req, res) => {
     let params = {
         TableName: USERS_TABLE,
         Item: {
-            email: 'emailBR@teste.com.br',
+            email: 'email' + Math.floor(Math.random() * 2000) + 'BR@teste.com.br',
             avaliable: 'true',
             password: 'teste123',
             createdAt: new Date().getTime(),
